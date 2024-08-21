@@ -99,19 +99,6 @@ def neuroglancer_visualize(n):
 
 
 if __name__ == '__main__':
-    input_output_pairs = [
-        (raw_image_dir, raw_output_file, 'raw_images'),
-        (segmentation_dir, seg_output_file, 'seg_images')
-    ]
-
-    # # - Compress and convert images files into h5 files
-
-    # if not (check_file_completeness(*input_output_pairs[0]) and check_file_completeness(*input_output_pairs[1])):
-    #     os.remove(raw_output_file)
-    #     os.remove(seg_output_file)
-    #     with ThreadPoolExecutor(max_workers=2) as executor:
-    #         executor.map(lambda p: process_images(p), input_output_pairs)
-
 
     print('Start to visualize with neuroglancer.')
     neuroglancer_visualize(5)
