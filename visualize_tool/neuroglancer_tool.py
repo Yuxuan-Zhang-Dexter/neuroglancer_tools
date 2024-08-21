@@ -10,7 +10,7 @@ import gc
 import socket
 import time
 import webbrowser
-from convert2h5 import process_images, check_file_completeness
+from neuroglancer_tools.convert_tool.convert2h5 import process_images, check_file_completeness
 from basic_tools import basic_functions
 from merge_split_tool import merge_split_function
 from selenium import webdriver

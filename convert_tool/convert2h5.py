@@ -10,6 +10,11 @@ import socket
 import time
 import webbrowser
 
+# Directories and output files
+raw_image_dir = '/media/mitochondria/Elements/spineheads/raw_images'
+segmentation_dir = '/media/mitochondria/Elements/spineheads/segmentations'
+raw_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5'
+seg_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5'
 
 def combine_images_to_hdf5(input_dir, output_file, dataset_name, chunk_size=10):
     output_dir = os.path.dirname(output_file)
@@ -67,4 +72,18 @@ def check_file_completeness(image_dir, output_file, dataset_name):
         tmp_dataset = fl[dataset_name]
         h5_num = tmp_dataset.shape[0]
     return images_num == h5_num
+
+if __name__ == '__main__':
+    input_output_pairs = [
+        (raw_image_dir, raw_output_file, 'raw_images'),
+        (segmentation_dir, seg_output_file, 'seg_images')
+    ]
+
+    # - Compress and convert images files into h5 files
+
+    if not (check_file_completeness(*input_output_pairs[0]) and check_file_completeness(*input_output_pairs[1])):
+        os.remove(raw_output_file)
+        os.remove(seg_output_file)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.map(lambda p: process_images(p), input_output_pairs)
 
