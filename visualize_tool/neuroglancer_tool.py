@@ -25,8 +25,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 # Directories and output files
 raw_image_dir = '/media/mitochondria/Elements/spineheads/raw_images'
 segmentation_dir = '/media/mitochondria/Elements/spineheads/segmentations'
-raw_output_file = '/home/mitochondria/Desktop/yuxuan_exp/neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5'
-seg_output_file = '/home/mitochondria/Desktop/yuxuan_exp/neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5'
+raw_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5'
+seg_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5'
 
 def find_available_port(start_port=8000, end_port=9000):
     """Find an available port in the given range."""
@@ -82,7 +82,7 @@ def neuroglancer_visualize(n):
         s.layers.append(name='im', layer=im_layer)
         s.layers.append(name='gt', layer=gt_layer)
     
-    basic_functions(viewer, gt, res)
+    basic_functions(viewer, im, gt, res)
     merge_split_function(viewer, gt, res, gt_layer)
 
     print(viewer)
