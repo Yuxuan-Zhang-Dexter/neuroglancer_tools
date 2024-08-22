@@ -193,6 +193,3 @@ This toolset is designed to be modular and extensible. Feel free to add addition
 
 
 ## License
-
-
-This project is licensed under the MIT License - see the LICENSE file for details.
