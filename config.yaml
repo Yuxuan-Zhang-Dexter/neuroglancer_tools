@@ -1,0 +1,25 @@
+task: "visualize"  # or "convert"
+
+visualize:
+  directories:
+    raw_image_dir: "/media/mitochondria/Elements/spineheads/raw_images"
+    segmentation_dir: "/media/mitochondria/Elements/spineheads/segmentations"
+  output_files:
+    raw_output_file: "/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5"
+    seg_output_file: "/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5"
+  neuroglancer:
+    start_port: 8000
+    end_port: 9000
+    ip_address: "localhost"
+  visualization:
+    num_images: 5
+    scales: [60, 4, 4]
+    units: ["nm", "nm", "nm"]
+
+convert:
+  directories:
+    raw_image_dir: "/media/mitochondria/Elements/spineheads/raw_images"
+    segmentation_dir: "/media/mitochondria/Elements/spineheads/segmentations"
+  output_files:
+    raw_output_file: "/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5"
+    seg_output_file: "/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5"

@@ -109,8 +109,6 @@ class merge_split_function:
             mouse_coord_2 = self.annotation_points[1][0]
             mouse_coord_2d_1 = np.round(mouse_coord_1[1:])
             mouse_coord_2d_2 = np.round(mouse_coord_2[1:])
-            target_z = int(np.round(mouse_coord_1[0]))
-            print(f'what is target_z: {target_z}')
 
             z_list = []
             non_zero_slices = []

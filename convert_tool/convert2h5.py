@@ -1,20 +1,14 @@
 import os
 import numpy as np
 from PIL import Image, ImageFile
-import neuroglancer
 import h5py
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import gc
-import socket
-import time
-import webbrowser
 
-# Directories and output files
-raw_image_dir = '/media/mitochondria/Elements/spineheads/raw_images'
-segmentation_dir = '/media/mitochondria/Elements/spineheads/segmentations'
-raw_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5'
-seg_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5'
+# Configure PIL to handle large and truncated images
+Image.MAX_IMAGE_PIXELS = None
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def combine_images_to_hdf5(input_dir, output_file, dataset_name, chunk_size=10):
     output_dir = os.path.dirname(output_file)
@@ -22,7 +16,6 @@ def combine_images_to_hdf5(input_dir, output_file, dataset_name, chunk_size=10):
         os.makedirs(output_dir)
 
     image_files = [f for f in sorted(os.listdir(input_dir)) if f.lower().endswith(('png', 'tiff', 'tif'))]
-    image_files = image_files
     total_images = len(image_files)
     if total_images == 0:
         print(f"No images found in {input_dir}.")
@@ -30,12 +23,11 @@ def combine_images_to_hdf5(input_dir, output_file, dataset_name, chunk_size=10):
 
     # Initialize HDF5 file
     with h5py.File(output_file, 'w') as h5file:
-        for chunk_index in tqdm(range(0, total_images, chunk_size), desc="Processing chunks", unit = "file"):
+        for chunk_index in tqdm(range(0, total_images, chunk_size), desc="Processing chunks", unit="file"):
             chunk_files = image_files[chunk_index:chunk_index + chunk_size]
             images = []
 
-            for i in tqdm(range(len(chunk_files)), desc= "Processing files", leave = False):
-                file_name = chunk_files[i]
+            for file_name in tqdm(chunk_files, desc="Processing files", leave=False):
                 file_path = os.path.join(input_dir, file_name)
                 try:
                     with Image.open(file_path) as img:
@@ -61,7 +53,6 @@ def combine_images_to_hdf5(input_dir, output_file, dataset_name, chunk_size=10):
 
     print(f"Combined images into {output_file}")
 
-
 def process_images(pair):
     input_dir, output_file, dataset_name = pair
     combine_images_to_hdf5(input_dir, output_file, dataset_name)
@@ -73,17 +64,18 @@ def check_file_completeness(image_dir, output_file, dataset_name):
         h5_num = tmp_dataset.shape[0]
     return images_num == h5_num
 
-if __name__ == '__main__':
+def run_conversion(config):
     input_output_pairs = [
-        (raw_image_dir, raw_output_file, 'raw_images'),
-        (segmentation_dir, seg_output_file, 'seg_images')
+        (config['directories']['raw_image_dir'], config['output_files']['raw_output_file'], 'raw_images'),
+        (config['directories']['segmentation_dir'], config['output_files']['seg_output_file'], 'seg_images')
     ]
 
-    # - Compress and convert images files into h5 files
-
+    # Compress and convert images files into h5 files
     if not (check_file_completeness(*input_output_pairs[0]) and check_file_completeness(*input_output_pairs[1])):
-        os.remove(raw_output_file)
-        os.remove(seg_output_file)
+        try:
+            os.remove(config['output_files']['raw_output_file'])
+            os.remove(config['output_files']['seg_output_file'])
+        except FileNotFoundError:
+            pass
         with ThreadPoolExecutor(max_workers=2) as executor:
             executor.map(lambda p: process_images(p), input_output_pairs)
-

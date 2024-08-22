@@ -1,18 +1,15 @@
-
 import os
 import numpy as np
 from PIL import Image, ImageFile
 import neuroglancer
 import h5py
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
 import gc
 import socket
 import time
 import webbrowser
-from neuroglancer_tools.convert_tool.convert2h5 import process_images, check_file_completeness
-from basic_tools import basic_functions
-from merge_split_tool import merge_split_function
+from .basic_tools import basic_functions  # Import relative to the module
+from .merge_split_tool import merge_split_function
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
@@ -22,17 +19,10 @@ from selenium.common.exceptions import WebDriverException
 Image.MAX_IMAGE_PIXELS = None
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-# Directories and output files
-raw_image_dir = '/media/mitochondria/Elements/spineheads/raw_images'
-segmentation_dir = '/media/mitochondria/Elements/spineheads/segmentations'
-raw_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/raw_images_h5/all_raw_images.h5'
-seg_output_file = '/home/mitochondria/Desktop/yuxuan_exp/developing_neuroglancer_tools/dataset/seg_images_h5/all_seg_images.h5'
-
 def find_available_port(start_port=8000, end_port=9000):
     """Find an available port in the given range."""
     for port in range(start_port, end_port):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            # Try to bind to the port
             result = sock.connect_ex(('127.0.0.1', port))
             if result != 0:  # Port is available
                 return port
@@ -48,24 +38,23 @@ def choose_first_n_images(file_path, dataset_name, n):
             return np.array(images, dtype=np.uint32)
         return np.array(images)
 
-
-def neuroglancer_visualize(n):
-    ip = 'localhost'
-    port = find_available_port()
+def run_visualization(config):
+    n = config['visualization']['num_images']
+    ip = config['neuroglancer']['ip_address']
+    port = find_available_port(config['neuroglancer']['start_port'], config['neuroglancer']['end_port'])
     neuroglancer.set_server_bind_address(bind_address=ip, bind_port=port)
     viewer = neuroglancer.Viewer()
 
-
     res = neuroglancer.CoordinateSpace(
         names=['z', 'y', 'x'],
-        units=['nm', 'nm', 'nm'],
-        scales=[60, 4, 4]
+        units=config['visualization']['units'],
+        scales=config['visualization']['scales']
     )
 
     print('Load raw image and segmentation.')
     try:
-        im = choose_first_n_images(raw_output_file, 'raw_images', n)
-        gt = choose_first_n_images(seg_output_file, 'seg_images', n)
+        im = choose_first_n_images(config['output_files']['raw_output_file'], 'raw_images', n)
+        gt = choose_first_n_images(config['output_files']['seg_output_file'], 'seg_images', n)
     except FileNotFoundError as e:
         print(e)
         return
@@ -89,17 +78,9 @@ def neuroglancer_visualize(n):
 
     webbrowser.open_new_tab(str(viewer))
 
-
     # Keep the script running
     try:
         while True:
-            pass  # Sleep for a minute before checking again
+            pass  # Keep the server running
     except KeyboardInterrupt:
         print("Server stopped by user.")
-
-
-if __name__ == '__main__':
-
-    print('Start to visualize with neuroglancer.')
-    neuroglancer_visualize(5)
-
